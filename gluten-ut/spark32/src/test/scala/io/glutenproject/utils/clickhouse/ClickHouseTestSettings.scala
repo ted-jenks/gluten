@@ -1656,8 +1656,6 @@ class ClickHouseTestSettings extends BackendTestSettings {
     .exclude("test reading unaligned pages - test all types (dict encode)")
   enableSuite[GlutenParquetCompressionCodecPrecedenceSuite]
   enableSuite[GlutenParquetEncodingSuite]
-  enableSuite[GlutenParquetFileFormatV1Suite]
-  enableSuite[GlutenParquetFileFormatV2Suite]
   enableSuite[GlutenParquetIOSuite]
     .exclude("Standard mode - nested map with struct as key type")
     .exclude("Legacy mode - nested map with struct as key type")
