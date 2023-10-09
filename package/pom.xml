@@ -230,8 +230,6 @@
                     <ignoreClass>org.apache.spark.sql.execution.datasources.FileFormatWriter$ConcurrentOutputWriterSpec</ignoreClass>
                     <ignoreClass>org.apache.spark.sql.execution.datasources.FileFormatWriter</ignoreClass>
                     <ignoreClass>org.apache.spark.sql.execution.datasources.ExecutedWriteSummary</ignoreClass>
-                    <ignoreClass>org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat$</ignoreClass>
-                    <ignoreClass>org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat*</ignoreClass>
                     <ignoreClass>org.apache.spark.sql.execution.datasources.orc.OrcFileFormat$</ignoreClass>
                     <ignoreClass>org.apache.spark.sql.execution.datasources.orc.OrcFileFormat*</ignoreClass>
                     <ignoreClass>org.apache.spark.sql.execution.datasources.FileFormatWriter$OutputSpec$</ignoreClass>

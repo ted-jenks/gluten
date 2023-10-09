@@ -1536,8 +1536,6 @@ class ClickHouseTestSettings extends BackendTestSettings {
   enableSuite[GlutenParquetDeltaLengthByteArrayEncodingSuite]
   enableSuite[GlutenParquetEncodingSuite].exclude("All Types Dictionary").exclude("All Types Null")
   enableSuite[GlutenParquetFieldIdIOSuite]
-  enableSuite[GlutenParquetFileFormatV1Suite]
-  enableSuite[GlutenParquetFileFormatV2Suite]
   enableSuite[GlutenParquetIOSuite]
     .exclude("Standard mode - nested map with struct as key type")
     .exclude("Legacy mode - nested map with struct as key type")
