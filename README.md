@@ -1,3 +1,7 @@
+- Fork to remove Parquet file format no reliance on classpath ordering
+
+- TODO: look into https://github.com/oap-project/gluten/pull/3063
+
 # Gluten: Plugin to Double SparkSQL's Performance
 *<b>This plugin is still under active development now, and doesn't have a stable release. Welcome to evaluate it. If you encounter any issues or have any suggestions, please submit to our issue list. We'd love to hear your feedback.</b>*
 
