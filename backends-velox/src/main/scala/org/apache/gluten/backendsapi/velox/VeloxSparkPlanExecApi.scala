@@ -633,7 +633,7 @@ class VeloxSparkPlanExecApi extends SparkPlanExecApi {
     }
     numOutputRows += serialized.map(_.getNumRows).sum
     dataSize += rawSize
-    ColumnarBuildSideRelation(child.output, serialized.map(_.getSerialized), mode)
+    ColumnarBuildSideRelation(child.output, serialized.map(_.getSerialized))
   }
 
   override def doCanonicalizeForBroadcastMode(mode: BroadcastMode): BroadcastMode = {

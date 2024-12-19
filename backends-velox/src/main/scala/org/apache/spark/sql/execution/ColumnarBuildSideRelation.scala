@@ -26,11 +26,8 @@ import org.apache.gluten.utils.ArrowAbiUtil
 import org.apache.gluten.vectorized.{ColumnarBatchSerializerJniWrapper, NativeColumnarToRowJniWrapper}
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression, UnsafeProjection, UnsafeRow}
-import org.apache.spark.sql.catalyst.plans.physical.BroadcastMode
-import org.apache.spark.sql.catalyst.plans.physical.IdentityBroadcastMode
+import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference, Expression, UnsafeProjection, UnsafeRow}
 import org.apache.spark.sql.execution.joins.BuildSideRelation
-import org.apache.spark.sql.execution.joins.HashedRelationBroadcastMode
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.utils.SparkArrowUtil
 import org.apache.spark.sql.vectorized.ColumnarBatch
@@ -40,18 +37,8 @@ import org.apache.arrow.c.ArrowSchema
 
 import scala.collection.JavaConverters.asScalaIteratorConverter
 
-case class ColumnarBuildSideRelation(
-    output: Seq[Attribute],
-    batches: Array[Array[Byte]],
-    mode: BroadcastMode)
+case class ColumnarBuildSideRelation(output: Seq[Attribute], batches: Array[Array[Byte]])
   extends BuildSideRelation {
-
-  private def transformProjection: UnsafeProjection = {
-    mode match {
-      case HashedRelationBroadcastMode(k, _) => UnsafeProjection.create(k)
-      case IdentityBroadcastMode => UnsafeProjection.create(output, output)
-    }
-  }
 
   override def deserialized: Iterator[ColumnarBatch] = {
     val runtime =
@@ -97,11 +84,8 @@ case class ColumnarBuildSideRelation(
   override def asReadOnlyCopy(): ColumnarBuildSideRelation = this
 
   /**
-   * Transform columnar broadcast value to Array[InternalRow] by key.
-   *
-   * NOTE:
-   *   - This method was called in Spark Driver, should manage resources carefully.
-   *   - The "key" must be already been bound reference.
+   * Transform columnar broadcast value to Array[InternalRow] by key and distinct. NOTE: This method
+   * was called in Spark Driver, should manage resources carefully.
    */
   override def transform(key: Expression): Array[InternalRow] = TaskResources.runUnsafe {
     val runtime =
@@ -122,7 +106,17 @@ case class ColumnarBuildSideRelation(
 
     var closed = false
 
-    val proj = UnsafeProjection.create(Seq(key))
+    val exprIds = output.map(_.exprId)
+    val projExpr = key.transformDown {
+      case attr: AttributeReference if !exprIds.contains(attr.exprId) =>
+        val i = output.count(_.name == attr.name)
+        if (i != 1) {
+          throw new IllegalArgumentException(s"Only one attr with the same name is supported: $key")
+        } else {
+          output.find(_.name == attr.name).get
+        }
+    }
+    val proj = UnsafeProjection.create(Seq(projExpr), output)
 
     // Convert columnar to Row.
     val jniWrapper = NativeColumnarToRowJniWrapper.create(runtime)
@@ -184,7 +178,7 @@ case class ColumnarBuildSideRelation(
                 rowId += 1
                 row
               }
-            }.map(transformProjection).map(proj).map(_.copy())
+            }.map(proj).map(_.copy())
           }
         }
       }
